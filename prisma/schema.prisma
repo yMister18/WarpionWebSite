@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum ShopCommandStatus {
+  PENDING
+  PUBLISHED
+  DELIVERED
+  FAILED
+}
+
+model Player {
+  id           String        @id @default(cuid())
+  uuid         String        @unique
+  username     String
+  stats        Json
+  lastSeenAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  orders       Order[]
+  shopCommands ShopCommand[]
+
+  @@index([username])
+}
+
+model Order {
+  id           String        @id @default(cuid())
+  playerId     String
+  externalId   String?       @unique
+  status       OrderStatus   @default(PENDING)
+  currency     String        @default("EUR")
+  totalAmount  Decimal       @db.Decimal(10, 2)
+  paymentMethod String?
+  paidAt       DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  player       Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+  shopCommands ShopCommand[]
+
+  @@index([playerId])
+  @@index([status])
+}
+
+model OrderItem {
+  id          String    @id @default(cuid())
+  orderId     String
+  productId   String?
+  productName String
+  quantity    Int       @default(1)
+  unitPrice   Decimal   @db.Decimal(10, 2)
+  totalPrice  Decimal   @db.Decimal(10, 2)
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model ShopCommand {
+  id          String             @id @default(cuid())
+  orderId     String
+  playerId    String
+  command     String
+  status      ShopCommandStatus  @default(PENDING)
+  attempts    Int                @default(0)
+  lastError   String?            @db.Text
+  publishedAt DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  order       Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  player      Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([playerId])
+  @@index([status])
+}

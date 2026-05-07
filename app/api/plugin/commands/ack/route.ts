@@ -1,11 +1,11 @@
-export const dynamic = 'force-dynamic';
-
 import { NextRequest } from 'next/server';
 import { ShopCommandStatus } from '@prisma/client';
 import { getPrismaClient } from '@/lib/prisma';
 import { ok, fail } from '@/lib/api-response';
 import { validatePluginKey } from '@/lib/plugin-auth';
 import { isObject, isString } from '@/lib/validation';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {

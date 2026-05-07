@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Isso avisa ao Next.js: "Não toque no Prisma, use-o como um pacote de servidor comum"
+  // Isso força o Next.js a usar o Prisma como um pacote de servidor comum,
+  // evitando que ele tente rodar em modo "Edge" durante o build.
   serverExternalPackages: ['@prisma/client'],
 };
 

@@ -1,20 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    // Isso força o uso do binário nativo gerado pelo 'prisma generate'
+    // @ts-ignore
+    engineType: 'library', 
+    log: ['error'],
+  });
+};
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: ['error'],
-  });
+export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-// Adicione esta função para resolver o erro do build
 export function getPrismaClient() {
   return prisma;
 }
 
-export default prisma;
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

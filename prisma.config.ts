@@ -9,6 +9,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["postgresql://warpion_user:646DjTUMEds7rBZGsIJ2RcXYuqrAauBJ@dpg-d7u8nclckfvc73eohdf0-a.oregon-postgres.render.com/warpion"],
   },
 });

@@ -1,11 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Apenas esta linha é necessária para o Prisma
+  // Isso avisa ao Next.js: "Não toque no Prisma, use-o como um pacote de servidor comum"
   serverExternalPackages: ['@prisma/client'],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 };
 
 export default nextConfig;

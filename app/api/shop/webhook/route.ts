@@ -12,6 +12,12 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+type CreatedCommand = {
+  id: string;
+  command: string;
+  orderId: string;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const prisma = getPrismaClient();
@@ -81,8 +87,10 @@ export async function POST(request: NextRequest) {
         });
 
         if (commandIssuanceLock.count === 0) {
+          const createdCommands: CreatedCommand[] = [];
+
           return {
-            createdCommands: [] as Array<{ id: string; command: string; orderId: string }>,
+            createdCommands,
             order: await tx.order.findUniqueOrThrow({ where: { id: order.id } }),
           };
         }

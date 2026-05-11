@@ -83,6 +83,8 @@ export async function POST(request: NextRequest) {
           },
           data: {
             commandsIssuedAt: new Date(),
+            deliveryStatus: 'PROCESSING',
+            deliveryCompletedAt: null,
           },
         });
 

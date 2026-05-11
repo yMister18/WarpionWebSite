@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     if (authError) return authError;
 
     const playerUuid = request.nextUrl.searchParams.get('playerUuid');
+    const processingOwner = request.nextUrl.searchParams.get('serverId') ?? 'unknown-server';
 
     if (!isValidUuid(playerUuid)) {
       return fail('Invalid or missing playerUuid', 400);
@@ -44,6 +45,8 @@ export async function GET(request: NextRequest) {
     const claimedCommands = [];
 
     for (const command of candidates) {
+      const now = new Date();
+
       const claimResult = await prisma.shopCommand.updateMany({
         where: {
           id: command.id,
@@ -56,7 +59,9 @@ export async function GET(request: NextRequest) {
           attempts: {
             increment: 1,
           },
-          publishedAt: command.publishedAt ?? new Date(),
+          publishedAt: command.publishedAt ?? now,
+          processingStartedAt: now,
+          processingOwner,
         },
       });
 

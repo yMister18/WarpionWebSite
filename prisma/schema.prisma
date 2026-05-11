@@ -40,24 +40,27 @@ model Player {
 }
 
 model Order {
-  id               String        @id @default(cuid())
-  playerId         String
-  externalId       String?       @unique
-  status           OrderStatus   @default(PENDING)
-  currency         String        @default("EUR")
-  totalAmount      Decimal       @db.Decimal(10, 2)
-  paymentMethod    String?
-  paidAt           DateTime?
-  commandsIssuedAt DateTime?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id                  String        @id @default(cuid())
+  playerId            String
+  externalId          String?       @unique
+  status              OrderStatus   @default(PENDING)
+  currency            String        @default("EUR")
+  totalAmount         Decimal       @db.Decimal(10, 2)
+  paymentMethod       String?
+  paidAt              DateTime?
+  commandsIssuedAt    DateTime?
+  deliveryStatus      String?       @default("PENDING")
+  deliveryCompletedAt DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
-  player           Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  items            OrderItem[]
-  shopCommands     ShopCommand[]
+  player              Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  items               OrderItem[]
+  shopCommands        ShopCommand[]
 
   @@index([playerId])
   @@index([status])
+  @@index([deliveryStatus])
 }
 
 model OrderItem {
@@ -77,22 +80,26 @@ model OrderItem {
 }
 
 model ShopCommand {
-  id          String             @id @default(cuid())
-  orderId     String
-  playerId    String
-  command     String
-  status      ShopCommandStatus  @default(PENDING)
-  attempts    Int                @default(0)
-  lastError   String?            @db.Text
-  publishedAt DateTime?
-  deliveredAt DateTime?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id                  String             @id @default(cuid())
+  orderId             String
+  playerId            String
+  command             String
+  status              ShopCommandStatus  @default(PENDING)
+  attempts            Int                @default(0)
+  lastError           String?            @db.Text
+  publishedAt         DateTime?
+  processingStartedAt DateTime?
+  processingOwner     String?
+  deliveredAt         DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
-  order       Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  player      Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  order               Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  player              Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([playerId])
   @@index([status])
+  @@index([processingStartedAt])
+  @@index([processingOwner])
 }

@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
     const commands = await prisma.shopCommand.findMany({
       where: {
         playerId: player.id,
-        status: ShopCommandStatus.PENDING,
+        status: {
+          in: [ShopCommandStatus.PENDING, ShopCommandStatus.PUBLISHED],
+        },
       },
       orderBy: {
         createdAt: 'asc',
@@ -48,6 +50,8 @@ export async function GET(request: NextRequest) {
               attempts: {
                 increment: 1,
               },
+              status: ShopCommandStatus.PUBLISHED,
+              publishedAt: command.publishedAt ?? new Date(),
             },
           })
         )
@@ -60,7 +64,7 @@ export async function GET(request: NextRequest) {
         shopCommandId: command.id,
         orderId: command.orderId,
         command: command.command,
-        status: command.status,
+        status: ShopCommandStatus.PUBLISHED,
         attempts: command.attempts + 1,
         createdAt: command.createdAt,
       })),

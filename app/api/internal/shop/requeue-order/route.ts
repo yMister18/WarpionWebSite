@@ -5,6 +5,7 @@ import { ok, fail } from '@/lib/api-response';
 import { validateInternalKey } from '@/lib/internal-auth';
 import { isObject, isString } from '@/lib/validation';
 import { recomputeOrderDeliveryStatus } from '@/lib/order-delivery';
+import { logAdminAction } from '@/lib/admin-action-log';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,18 @@ export async function POST(request: NextRequest) {
     });
 
     const updatedOrder = await recomputeOrderDeliveryStatus(prisma, orderId);
+
+    await logAdminAction({
+      action: 'REQUEUE_ORDER',
+      entityType: 'ORDER',
+      entityId: order.id,
+      actor: 'internal_admin',
+      details: {
+        requeuedCount: result.count,
+        orderStatus: order.status,
+        deliveryStatus: order.deliveryStatus,
+     },
+    });
 
     return ok({
       requeuedCount: result.count,

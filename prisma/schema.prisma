@@ -103,3 +103,17 @@ model ShopCommand {
   @@index([processingStartedAt])
   @@index([processingOwner])
 }
+
+model AdminActionLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String?
+  actor      String
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([action, createdAt])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

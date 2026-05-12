@@ -4,6 +4,7 @@ import { getPrismaClient } from '@/lib/prisma';
 import { ok, fail } from '@/lib/api-response';
 import { validateInternalKey } from '@/lib/internal-auth';
 import { isObject, isString } from '@/lib/validation';
+import { logAdminAction } from '@/lib/admin-action-log';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
       where: { id: shopCommandId },
     });
 
+    
     if (!existing) {
       return fail('ShopCommand not found', 404);
     }
@@ -49,8 +51,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    await logAdminAction({
+      action: 'REQUEUE_COMMAND',
+      entityType: 'ShopCommand',
+      entityId: shopCommandId,
+      actor: 'internal-api',
+      details: {
+        orderId: existing.orderId,
+        playerId: existing.playerId,
+        status: existing.status,
+    },
+    });
+
     return ok({
       shopCommand: updated,
+      
     });
   } catch (error) {
     console.error('POST /api/internal/shop/requeue-command error:', error);
